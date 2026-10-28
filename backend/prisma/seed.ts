@@ -84,11 +84,11 @@ async function main() {
       file: 'PSEST022.prw',
       moduleCode: 'SIGAEST',
       description: 'Rotina de reclassificação automática de saldo entre armazéns',
-      author: 'Welison Mendonça',
+      author: 'Raissa Cogo',
       inProductionAt: new Date('2026-01-15'),
       changelog: [
-        { version: '1.1', date: new Date('2026-02-10'), author: 'Welison Mendonça', description: 'Suporte a múltiplos armazéns de destino' },
-        { version: '1.0', date: new Date('2026-01-15'), author: 'Welison Mendonça', description: 'Versão inicial em produção' },
+        { version: '1.1', date: new Date('2026-02-10'), author: 'Raissa Cogo', description: 'Suporte a múltiplos armazéns de destino' },
+        { version: '1.0', date: new Date('2026-01-15'), author: 'Raissa Cogo', description: 'Versão inicial em produção' },
       ],
     },
     {

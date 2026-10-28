@@ -1,0 +1,21 @@
+generator client {
+    provider        = "prisma-client-js"
+    output          = "../src/generated/prisma-protheus"
+    previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+    provider = "sqlserver"
+    schemas  = ["dbo"]
+}
+
+model SX6010 {
+    X6_FIL     String @default("    ") @db.VarChar(4)
+    X6_VAR     String @db.VarChar(20)
+    X6_DESCRIC String @db.VarChar(60)
+    X6_CONTEUD String @db.Text
+
+    @@id([X6_FIL, X6_VAR])
+    @@map("SX6010")
+    @@schema("dbo")
+}
