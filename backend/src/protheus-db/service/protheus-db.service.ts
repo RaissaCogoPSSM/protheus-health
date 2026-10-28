@@ -9,6 +9,48 @@ export interface ProtheusParamRow {
   CONTEUDO: string;
 }
 
+interface ProtheusDbConfig {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+  encrypt: boolean;
+  trustServerCertificate: boolean;
+}
+
+// Aceita o formato de connection string do Prisma para SQL Server:
+// sqlserver://host:port;database=DB;user=USER;password=PASS;...
+function parseSqlServerUrl(url: string): ProtheusDbConfig {
+  const withoutScheme = url.replace(/^sqlserver:\/\//i, '');
+  const [authority, ...parts] = withoutScheme.split(';');
+  const [host, portStr] = authority.split(':');
+
+  const params = new Map<string, string>();
+  for (const part of parts) {
+    const eq = part.indexOf('=');
+    if (eq === -1) continue;
+    params.set(part.slice(0, eq).trim().toLowerCase(), part.slice(eq + 1).trim());
+  }
+
+  const database = params.get('database');
+  const user = params.get('user');
+  const password = params.get('password');
+  if (!host || !database || !user || !password) {
+    throw new Error('DATABASE_URL_PROTHEUS inválida (esperado host, database, user e password)');
+  }
+
+  return {
+    host,
+    port: Number(portStr ?? params.get('port') ?? 1433),
+    database,
+    user,
+    password,
+    encrypt: (params.get('encrypt') ?? 'true') !== 'false',
+    trustServerCertificate: (params.get('trustservercertificate') ?? 'false') === 'true',
+  };
+}
+
 @Injectable()
 export class ProtheusDbService implements OnModuleDestroy {
   private readonly logger = new Logger(ProtheusDbService.name);
@@ -16,8 +58,9 @@ export class ProtheusDbService implements OnModuleDestroy {
 
   constructor(private readonly config: ConfigService) {}
 
-  private async getPool(): Promise<sql.ConnectionPool> {
-    if (this.pool?.connected) return this.pool;
+  private resolveConfig(): ProtheusDbConfig {
+    const connectionUrl = this.config.get<string>('DATABASE_URL_PROTHEUS');
+    if (connectionUrl) return parseSqlServerUrl(connectionUrl);
 
     const host = this.config.get<string>('PROTHEUS_DB_HOST');
     const database = this.config.get<string>('PROTHEUS_DB_DATABASE');
@@ -25,13 +68,25 @@ export class ProtheusDbService implements OnModuleDestroy {
     const password = this.config.get<string>('PROTHEUS_DB_PASSWORD');
     if (!host || !database || !user || !password) {
       throw new Error(
-        'Configuração do banco do Protheus incompleta (PROTHEUS_DB_HOST/DATABASE/USER/PASSWORD)',
+        'Configuração do banco do Protheus incompleta (defina DATABASE_URL_PROTHEUS ou PROTHEUS_DB_HOST/DATABASE/USER/PASSWORD)',
       );
     }
 
-    const port = Number(this.config.get<string>('PROTHEUS_DB_PORT') ?? 1433);
-    const encrypt = this.config.get<string>('PROTHEUS_DB_ENCRYPT') !== 'false';
-    const trustServerCertificate = this.config.get<string>('PROTHEUS_DB_TRUST_CERT') === 'true';
+    return {
+      host,
+      database,
+      user,
+      password,
+      port: Number(this.config.get<string>('PROTHEUS_DB_PORT') ?? 1433),
+      encrypt: this.config.get<string>('PROTHEUS_DB_ENCRYPT') !== 'false',
+      trustServerCertificate: this.config.get<string>('PROTHEUS_DB_TRUST_CERT') === 'true',
+    };
+  }
+
+  private async getPool(): Promise<sql.ConnectionPool> {
+    if (this.pool?.connected) return this.pool;
+
+    const { host, port, database, user, password, encrypt, trustServerCertificate } = this.resolveConfig();
 
     this.pool = await new sql.ConnectionPool({
       server: host,
