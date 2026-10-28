@@ -9,6 +9,7 @@ import { KnowledgeItemsModule } from './knowledge-items/knowledge-items.module.j
 import { JobsModule } from './jobs/jobs.module.js';
 import { IntegrationsModule } from './integrations/integrations.module.js';
 import { TicketsModule } from './tickets/tickets.module.js';
+import { SyncModule } from './sync/sync.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TicketsModule } from './tickets/tickets.module.js';
     JobsModule,
     IntegrationsModule,
     TicketsModule,
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [AppService],
