@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: protheus_health
     ports:
-      - "5432:5432"
+      - "5437:5432"
     volumes:
       - protheus-health-db:/var/lib/postgresql/data
 

@@ -37,7 +37,7 @@ const targetLabel: Record<TicketTarget, string> = {
             <td>{{ t.title }}</td>
             <td>{{ categoryLabel[t.category] }}</td>
             <td>{{ targetLabel[t.target] }}</td>
-            <td>{{ t.openedAt }}</td>
+            <td>{{ formatDate(t.openedAt) }}</td>
             <td>
               <StatusBadge
                 :label="useTicketStatus(t.status).label"

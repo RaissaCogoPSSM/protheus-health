@@ -2,13 +2,7 @@
 import type { ProtheusJob } from '~/types/protheus'
 
 const { data: jobsData } = await useApi<ProtheusJob[]>('/jobs')
-const jobs = computed(() => jobsData.value ?? [])
-
-function formatDateTime(value?: string | null) {
-  if (!value) return '—'
-  return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-}
-</script>
+const jobs = computed(() => jobsData.value ?? [])</script>
 
 <template>
   <div>

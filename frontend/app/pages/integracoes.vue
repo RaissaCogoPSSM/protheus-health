@@ -20,7 +20,7 @@ const integrations = computed(() => integrationsData.value ?? [])
         </div>
         <p>{{ i.description }}</p>
         <span class="failure">
-          Última falha: {{ i.lastFailureAt ?? 'nunca' }}
+          Última falha: {{ i.lastFailureAt ? formatDate(i.lastFailureAt) : 'nunca' }}
         </span>
       </UiCard>
     </div>

@@ -62,7 +62,7 @@ function moduleName(moduleId: string) {
             </div>
             <div>
               <dt>Em produção desde</dt>
-              <dd>{{ selected.inProductionAt ?? '—' }}</dd>
+              <dd>{{ formatDate(selected.inProductionAt) }}</dd>
             </div>
           </dl>
 
@@ -71,7 +71,7 @@ function moduleName(moduleId: string) {
             <li v-for="entry in selected.changelog" :key="entry.id">
               <div class="changelog-head">
                 <strong>v{{ entry.version }}</strong>
-                <span>{{ entry.date }}</span>
+                <span>{{ formatDate(entry.date) }}</span>
               </div>
               <p>{{ entry.description }}</p>
               <span v-if="entry.author" class="changelog-author">{{ entry.author }}</span>

@@ -76,7 +76,7 @@ const moduleCustomizations = computed(() => selected.value?.customizations ?? []
             </div>
             <div>
               <dt>Última atualização</dt>
-              <dd>{{ selected.lastUpdateAt ?? '—' }}</dd>
+              <dd>{{ formatDate(selected.lastUpdateAt) }}</dd>
             </div>
             <div>
               <dt>Customizações neste módulo</dt>
@@ -97,7 +97,7 @@ const moduleCustomizations = computed(() => selected.value?.customizations ?? []
               <tr v-for="p in modulePatches" :key="p.id">
                 <td>{{ p.version }}</td>
                 <td>{{ p.description }}</td>
-                <td>{{ p.appliedAt }}</td>
+                <td>{{ formatDate(p.appliedAt) }}</td>
               </tr>
             </tbody>
           </table>
