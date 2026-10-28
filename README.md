@@ -23,6 +23,6 @@ pnpm db:seed
 ## Desenvolvimento
 
 ```bash
-pnpm dev:backend    # http://localhost:3001
-pnpm dev:frontend   # http://localhost:3000
+pnpm dev:backend    # http://localhost:3005
+pnpm dev:frontend   # http://localhost:3006
 ```

@@ -1,6 +1,5 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { TphUpdatesService } from '../service/tph-updates.service.js';
-
 
 @Controller('sync')
 export class SyncController {
@@ -8,6 +7,11 @@ export class SyncController {
 
   @Post('updates')
   trigger() {
-    return this.tphUpdatesService.sync();
+    return this.tphUpdatesService.trigger();
+  }
+
+  @Get('updates')
+  status() {
+    return this.tphUpdatesService.getState();
   }
 }

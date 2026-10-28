@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type { ProtheusModule, ProtheusModuleDetail } from '~/types/protheus'
 
-const { data: modulesData } = await useApi<ProtheusModule[]>('/modules')
+const { data: modulesData, refresh: refreshModules } = await useApi<ProtheusModule[]>('/modules')
 const modules = computed(() => modulesData.value ?? [])
+
+async function onSyncDone() {
+  await refreshModules()
+  if (selectedId.value) await loadDetail(selectedId.value)
+}
 
 const selectedId = ref<string | null>(null)
 const selected = ref<ProtheusModuleDetail | null>(null)
@@ -33,7 +38,11 @@ const moduleCustomizations = computed(() => selected.value?.customizations ?? []
 
 <template>
   <div>
-    <PageHeader title="Módulos" subtitle="Saúde dos módulos e pacotes/patches aplicados" />
+    <PageHeader title="Módulos" subtitle="Saúde dos módulos e pacotes/patches aplicados">
+      <template #actions>
+        <SyncButton @done="onSyncDone" />
+      </template>
+    </PageHeader>
 
     <MasterDetail>
       <template #list>

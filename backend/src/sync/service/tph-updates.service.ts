@@ -14,14 +14,49 @@ interface TphUpdatesResponse {
   packagesApplied?: TphPackage[];
 }
 
+export type SyncStatus = 'idle' | 'running' | 'done' | 'error';
+
+export interface SyncState {
+  status: SyncStatus;
+  startedAt?: string;
+  finishedAt?: string;
+  summary?: SyncSummary;
+  error?: string;
+}
+
 @Injectable()
 export class TphUpdatesService {
   private readonly logger = new Logger(TphUpdatesService.name);
+  private state: SyncState = { status: 'idle' };
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
+
+  getState(): SyncState {
+    return this.state;
+  }
+
+  trigger(): SyncState {
+    if (this.state.status === 'running') return this.state;
+
+    this.state = { status: 'running', startedAt: new Date().toISOString() };
+    this.runInBackground();
+    return this.state;
+  }
+
+  private runInBackground() {
+    const startedAt = this.state.startedAt;
+    this.sync()
+      .then((summary) => {
+        this.state = { status: 'done', startedAt, finishedAt: new Date().toISOString(), summary };
+      })
+      .catch((error: Error) => {
+        this.logger.error('Falha ao sincronizar TPH/updates', error);
+        this.state = { status: 'error', startedAt, finishedAt: new Date().toISOString(), error: error.message };
+      });
+  }
 
   private async fetchPackages(): Promise<TphPackage[]> {
     const url = this.config.get<string>('TPH_UPDATES_URL');
