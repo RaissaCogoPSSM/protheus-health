@@ -46,6 +46,7 @@ export interface ProtheusKnowledgeField {
   id: string
   name: string
   description: string
+  position?: number
 }
 
 export interface ProtheusKnowledgeItem {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ProtheusTicket, TicketCategory, TicketTarget } from '~/types/protheus'
 
-const { data: ticketsData } = await useApi<ProtheusTicket[]>('/tickets')
+const { data: ticketsData, refresh: refreshTickets } = await useApi<ProtheusTicket[]>('/tickets')
 const tickets = computed(() => ticketsData.value ?? [])
 
 const categoryLabel: Record<TicketCategory, string> = {
@@ -13,11 +13,22 @@ const targetLabel: Record<TicketTarget, string> = {
   TOTVS: 'TOTVS',
   CONSULTANCY: 'Consultoria'
 }
+
+const showCreateDialog = ref(false)
+
+async function onTicketCreated() {
+  showCreateDialog.value = false
+  await refreshTickets()
+}
 </script>
 
 <template>
   <div>
-    <PageHeader title="Chamados" subtitle="Chamados TOTVS / Consultoria" />
+    <PageHeader title="Chamados" subtitle="Chamados TOTVS / Consultoria">
+      <template #actions>
+        <button type="button" class="btn-primary" @click="showCreateDialog = true">Adicionar</button>
+      </template>
+    </PageHeader>
 
     <UiCard class="table-card">
       <table class="table">
@@ -48,10 +59,23 @@ const targetLabel: Record<TicketTarget, string> = {
         </tbody>
       </table>
     </UiCard>
+
+    <TicketFormDialog v-if="showCreateDialog" @close="showCreateDialog = false" @created="onTicketCreated" />
   </div>
 </template>
 
 <style scoped>
+.btn-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
 .table-card {
   padding: 8px;
   overflow-x: auto;

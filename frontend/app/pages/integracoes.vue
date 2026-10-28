@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import type { ProtheusIntegration } from '~/types/protheus'
 
-const { data: integrationsData } = await useApi<ProtheusIntegration[]>('/integrations')
+const { data: integrationsData, refresh: refreshIntegrations } = await useApi<ProtheusIntegration[]>('/integrations')
 const integrations = computed(() => integrationsData.value ?? [])
+
+const showCreateDialog = ref(false)
+
+async function onIntegrationCreated() {
+  showCreateDialog.value = false
+  await refreshIntegrations()
+}
 </script>
 
 <template>
   <div>
-    <PageHeader title="Integrações" subtitle="Integrações externas" />
+    <PageHeader title="Integrações" subtitle="Integrações externas">
+      <template #actions>
+        <button type="button" class="btn-primary" @click="showCreateDialog = true">Adicionar</button>
+      </template>
+    </PageHeader>
 
     <div class="grid">
       <UiCard v-for="i in integrations" :key="i.id" class="integration">
@@ -24,10 +35,23 @@ const integrations = computed(() => integrationsData.value ?? [])
         </span>
       </UiCard>
     </div>
+
+    <IntegrationFormDialog v-if="showCreateDialog" @close="showCreateDialog = false" @created="onIntegrationCreated" />
   </div>
 </template>
 
 <style scoped>
+.btn-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

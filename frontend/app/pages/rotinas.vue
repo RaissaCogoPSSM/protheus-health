@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ProtheusCustomization, ProtheusModule } from '~/types/protheus'
 
-const { data: customizationsData } = await useApi<ProtheusCustomization[]>('/customizations')
+const { data: customizationsData, refresh: refreshCustomizations } = await useApi<ProtheusCustomization[]>('/customizations')
 const { data: modulesData } = await useApi<ProtheusModule[]>('/modules')
 
 const customizations = computed(() => customizationsData.value ?? [])
@@ -21,11 +21,30 @@ const selected = computed(() => customizations.value.find((c) => c.id === select
 function moduleName(moduleId: string) {
   return modules.value.find((m) => m.id === moduleId)?.code ?? '—'
 }
+
+const showCreateDialog = ref(false)
+const showChangelogDialog = ref(false)
+
+async function onCustomizationCreated(created: ProtheusCustomization) {
+  showCreateDialog.value = false
+  await refreshCustomizations()
+  selectedId.value = created.id
+}
+
+async function onChangelogAdded(updated: ProtheusCustomization) {
+  showChangelogDialog.value = false
+  await refreshCustomizations()
+  selectedId.value = updated.id
+}
 </script>
 
 <template>
   <div>
-    <PageHeader title="Rotinas AdvPL" subtitle="Catálogo de rotinas AdvPL · cadastro de customizações" />
+    <PageHeader title="Rotinas AdvPL" subtitle="Catálogo de rotinas AdvPL · cadastro de customizações">
+      <template #actions>
+        <button type="button" class="btn-primary" @click="showCreateDialog = true">Adicionar</button>
+      </template>
+    </PageHeader>
 
     <MasterDetail>
       <template #list>
@@ -66,7 +85,10 @@ function moduleName(moduleId: string) {
             </div>
           </dl>
 
-          <h3>Changelog</h3>
+          <div class="changelog-head-row">
+            <h3>Changelog</h3>
+            <button type="button" class="btn-ghost" @click="showChangelogDialog = true">Adicionar histórico</button>
+          </div>
           <ul v-if="selected.changelog.length" class="changelog">
             <li v-for="entry in selected.changelog" :key="entry.id">
               <div class="changelog-head">
@@ -82,6 +104,21 @@ function moduleName(moduleId: string) {
         <EmptyState v-else message="Selecione uma rotina para ver o changelog." />
       </template>
     </MasterDetail>
+
+    <CustomizationFormDialog
+      v-if="showCreateDialog"
+      :modules="modules"
+      @close="showCreateDialog = false"
+      @created="onCustomizationCreated"
+    />
+
+    <ChangelogFormDialog
+      v-if="showChangelogDialog && selected"
+      :customization-id="selected.id"
+      :customization-file="selected.file"
+      @close="showChangelogDialog = false"
+      @added="onChangelogAdded"
+    />
   </div>
 </template>
 
@@ -138,7 +175,37 @@ function moduleName(moduleId: string) {
 h3 {
   font-size: 13.5px;
   color: var(--ink);
+  margin: 0;
+}
+
+.changelog-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 10px;
+}
+
+.btn-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .changelog {

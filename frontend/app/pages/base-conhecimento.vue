@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { KnowledgeType, ProtheusKnowledgeItem } from '~/types/protheus'
+import type { KnowledgeType, ProtheusKnowledgeItem, ProtheusModule } from '~/types/protheus'
 
 const tabs: { key: KnowledgeType; label: string }[] = [
   { key: 'TABLE', label: 'Tabelas' },
@@ -7,8 +7,10 @@ const tabs: { key: KnowledgeType; label: string }[] = [
   { key: 'FAQ', label: 'FAQ' }
 ]
 
-const { data: itemsData } = await useApi<ProtheusKnowledgeItem[]>('/knowledge-items')
+const { data: itemsData, refresh: refreshItems } = await useApi<ProtheusKnowledgeItem[]>('/knowledge-items')
+const { data: modulesData } = await useApi<ProtheusModule[]>('/modules')
 const knowledgeItems = computed(() => itemsData.value ?? [])
+const modules = computed(() => modulesData.value ?? [])
 
 const activeTab = ref<KnowledgeType>('TABLE')
 const filtered = computed(() => knowledgeItems.value.filter((i) => i.type === activeTab.value))
@@ -21,11 +23,30 @@ watch(filtered, (list) => {
     selectedId.value = list[0]?.id ?? null
   }
 }, { immediate: true })
+
+const showCreateDialog = ref(false)
+
+async function onFaqCreated(created: ProtheusKnowledgeItem) {
+  showCreateDialog.value = false
+  await refreshItems()
+  selectedId.value = created.id
+}
 </script>
 
 <template>
   <div>
-    <PageHeader title="Base de Conhecimento" subtitle="Tabelas, parâmetros e FAQs do ambiente Protheus" />
+    <PageHeader title="Base de Conhecimento" subtitle="Tabelas, parâmetros e FAQs do ambiente Protheus">
+      <template #actions>
+        <button
+          v-if="activeTab === 'FAQ'"
+          type="button"
+          class="btn-primary"
+          @click="showCreateDialog = true"
+        >
+          Adicionar FAQ
+        </button>
+      </template>
+    </PageHeader>
 
     <div class="tabs">
       <button
@@ -100,10 +121,28 @@ watch(filtered, (list) => {
         <EmptyState v-else message="Selecione um item à esquerda para ver os detalhes." />
       </template>
     </MasterDetail>
+
+    <FaqFormDialog
+      v-if="showCreateDialog"
+      :modules="modules"
+      @close="showCreateDialog = false"
+      @created="onFaqCreated"
+    />
   </div>
 </template>
 
 <style scoped>
+.btn-primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
 .tabs {
   display: inline-flex;
   gap: 4px;
