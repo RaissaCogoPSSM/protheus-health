@@ -49,7 +49,7 @@ watch(filtered, (list) => {
           @click="selectedId = item.id"
         >
           <div class="row">
-            <strong>{{ item.title }}</strong>
+            <strong>{{ item.title }}<span v-if="item.branch" class="branch-tag"> · {{ item.branch }}</span></strong>
             <span>{{ item.summary }}</span>
           </div>
         </ListItemButton>
@@ -83,6 +83,9 @@ watch(filtered, (list) => {
           </template>
 
           <template v-else-if="selected.type === 'PARAM'">
+            <h3>Filial</h3>
+            <p class="meta-text">{{ selected.branch ?? '—' }}</p>
+
             <h3>Valores possíveis</h3>
             <p class="meta-text">{{ selected.possibleValues ?? '—' }}</p>
           </template>
@@ -135,6 +138,11 @@ watch(filtered, (list) => {
 
 .row strong {
   font-size: 13.5px;
+}
+
+.branch-tag {
+  font-weight: 500;
+  color: var(--ink-faint);
 }
 
 .row span {

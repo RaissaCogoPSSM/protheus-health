@@ -99,7 +99,8 @@ model ProtheusKnowledgeItem {
   moduleId       String? // null = "Geral"
   module         ProtheusModule?       @relation(fields: [moduleId], references: [id])
   relationships  String? // TABLE
-  possibleValues String? // PARAM
+  possibleValues String? // PARAM (X6_CONTEUD)
+  branch         String? // PARAM (X6_FIL) — parâmetro é por filial
   steps          String[] // FAQ (passo a passo, em ordem)
 
   fields ProtheusKnowledgeField[] // TABLE

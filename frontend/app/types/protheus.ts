@@ -57,6 +57,7 @@ export interface ProtheusKnowledgeItem {
   moduleId?: string | null
   relationships?: string | null
   possibleValues?: string | null
+  branch?: string | null
   steps: string[]
   fields: ProtheusKnowledgeField[]
 }

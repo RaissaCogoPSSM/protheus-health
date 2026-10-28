@@ -10,6 +10,7 @@ import { JobsModule } from './jobs/module/jobs.module.js';
 import { IntegrationsModule } from './integrations/module/integrations.module.js';
 import { TicketsModule } from './tickets/module/tickets.module.js';
 import { SyncModule } from './sync/module/sync.module.js';
+import { ParamsSyncModule } from './params-sync/module/params-sync.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SyncModule } from './sync/module/sync.module.js';
     IntegrationsModule,
     TicketsModule,
     SyncModule,
+    ParamsSyncModule,
   ],
   controllers: [AppController],
   providers: [AppService],
