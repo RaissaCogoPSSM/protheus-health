@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProtheusModuleStatus {
+  UP_TO_DATE
+  OUTDATED
+}
+
+model ProtheusModule {
+  id             String               @id @default(cuid())
+  code           String               @unique // "SIGAFAT"
+  name           String // "Faturamento"
+  description    String? // "Emissão de pedidos, NF-e e faturamento"
+  status         ProtheusModuleStatus @default(UP_TO_DATE)
+  currentVersion String? // última versão de pacote aplicada
+  lastUpdateAt   DateTime?
+
+  patches        ProtheusPatch[]
+  customizations ProtheusCustomization[]
+  knowledgeItems ProtheusKnowledgeItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("protheus_modules")
+}
+
+// Pacotes/patches aplicados (alimentado pelo sync do endpoint /tph/updates)
+model ProtheusPatch {
+  id          String         @id @default(cuid())
+  moduleId    String
+  module      ProtheusModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  version     String // "12.1.2210"
+  description String
+  appliedAt   DateTime
+
+  createdAt DateTime @default(now())
+
+  @@unique([moduleId, version]) // sync idempotente (upsert)
+  @@index([moduleId, appliedAt])
+  @@map("protheus_patches")
+}
+
+// ---------------- Rotinas AdvPL / Customizações (entidade única) ----------------
+
+model ProtheusCustomization {
+  id             String         @id @default(cuid())
+  file           String         @unique // "PSFAT010.prw"
+  moduleId       String
+  module         ProtheusModule @relation(fields: [moduleId], references: [id])
+  description    String // "O que faz"
+  author         String? // Responsável
+  inProductionAt DateTime? // Em produção desde
+
+  changelog ProtheusCustomizationChangelog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([moduleId])
+  @@map("protheus_customizations")
+}
+
+model ProtheusCustomizationChangelog {
+  id              String                 @id @default(cuid())
+  customizationId String
+  customization   ProtheusCustomization @relation(fields: [customizationId], references: [id], onDelete: Cascade)
+  version         String // "1.4"
+  date            DateTime
+  author          String?
+  description     String
+
+  createdAt DateTime @default(now())
+
+  @@index([customizationId, date])
+  @@map("protheus_customization_changelog")
+}
+
+// ---------------- Base de Conhecimento (tabela | parâmetro | FAQ) ----------------
+
+enum ProtheusKnowledgeType {
+  TABLE
+  PARAM
+  FAQ
+}
+
+model ProtheusKnowledgeItem {
+  id             String                @id @default(cuid())
+  slug           String                @unique // "sc5", "mv_nfenum", "faq_boleto"
+  type           ProtheusKnowledgeType
+  title          String // "SC5 - Pedido de Venda" | "MV_NFENUM" | "Como emitir um boleto avulso"
+  summary        String
+  moduleId       String? // null = "Geral"
+  module         ProtheusModule?       @relation(fields: [moduleId], references: [id])
+  relationships  String? // TABLE
+  possibleValues String? // PARAM
+  steps          String[] // FAQ (passo a passo, em ordem)
+
+  fields ProtheusKnowledgeField[] // TABLE
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([moduleId])
+  @@map("protheus_knowledge_items")
+}
+
+model ProtheusKnowledgeField {
+  id          String                @id @default(cuid())
+  itemId      String
+  item        ProtheusKnowledgeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  name        String // "C5_NUM"
+  description String
+  position    Int                   @default(0)
+
+  @@unique([itemId, name])
+  @@map("protheus_knowledge_fields")
+}
+
+// ---------------- Jobs & Erros ----------------
+
+enum ProtheusJobStatus {
+  SUCCESS
+  FAILED
+}
+
+model ProtheusJob {
+  id          String            @id @default(cuid())
+  name        String            @unique // "JOB_NFE_ENVIO"
+  description String
+  schedule    String // "A cada 15 min" | "Diário, 06:00"
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  status      ProtheusJobStatus @default(SUCCESS)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("protheus_jobs")
+}
+
+// ---------------- Integrações ----------------
+
+enum ProtheusIntegrationStatus {
+  OPERATIONAL
+  UNSTABLE
+  FAILED
+}
+
+model ProtheusIntegration {
+  id            String                    @id @default(cuid())
+  name          String                    @unique // "Siscomex"
+  description   String
+  status        ProtheusIntegrationStatus @default(OPERATIONAL)
+  lastFailureAt DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  @@map("protheus_integrations")
+}
+
+// ---------------- Chamados TOTVS / Consultoria (TI -> fornecedor) ----------------
+
+enum ProtheusTicketCategory {
+  FIX // Correção
+  IMPROVEMENT // Melhoria
+}
+
+enum ProtheusTicketTarget {
+  TOTVS
+  CONSULTANCY
+}
+
+enum ProtheusTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_TOTVS
+  DONE
+}
+
+model ProtheusTicket {
+  id       String                 @id @default(cuid())
+  number   String                 @unique // "4821"
+  title    String
+  category ProtheusTicketCategory
+  target   ProtheusTicketTarget
+  status   ProtheusTicketStatus   @default(OPEN)
+  openedAt DateTime
+
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("protheus_tickets")
+}
