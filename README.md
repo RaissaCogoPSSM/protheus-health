@@ -2,24 +2,27 @@
 
 Monitoramento/gestão do ambiente Protheus (módulos, patches, customizações AdvPL, base de conhecimento, jobs, integrações e chamados TOTVS/consultoria).
 
-## Stack
+## Estrutura
 
-- **apps/web** — Nuxt 4
-- **apps/api** — NestJS 12 + Prisma + PostgreSQL
+- **frontend/** — Nuxt 4
+- **backend/** — NestJS 12 + Prisma
+- **infra/** — docker-compose (PostgreSQL)
 - Monorepo com pnpm workspaces
 
 ## Setup
 
 ```bash
 pnpm install
-cp apps/api/.env.example apps/api/.env   # ajuste DATABASE_URL
+cp backend/.env.example backend/.env   # ajuste DATABASE_URL se necessário
+pnpm infra:up                          # sobe o PostgreSQL local
 pnpm db:generate
 pnpm db:migrate
+pnpm db:seed
 ```
 
 ## Desenvolvimento
 
 ```bash
-pnpm dev:api   # http://localhost:3001
-pnpm dev:web   # http://localhost:3000
+pnpm dev:backend    # http://localhost:3001
+pnpm dev:frontend   # http://localhost:3000
 ```
