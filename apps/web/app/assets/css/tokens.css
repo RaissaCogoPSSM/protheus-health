@@ -1,0 +1,56 @@
+:root {
+  /* Porto Seco — azul-marinho */
+  --accent: oklch(32% 0.08 255);
+  --accent-soft: oklch(94% 0.02 255);
+  --accent-strong: oklch(20% 0.06 255);
+  --accent-contrast: #ffffff;
+
+  /* Neutros quentes (herdados do layout original) */
+  --bg: oklch(96.5% 0.004 255);
+  --surface: #ffffff;
+  --border: oklch(91% 0.006 255);
+
+  --ink: oklch(20% 0.012 255);
+  --ink-soft: oklch(46% 0.014 255);
+  --ink-faint: oklch(63% 0.01 255);
+
+  /* Semânticas (status) */
+  --success: oklch(52% 0.12 152);
+  --success-soft: oklch(94% 0.045 152);
+  --warning: oklch(58% 0.15 75);
+  --warning-soft: oklch(95% 0.06 80);
+  --danger: oklch(55% 0.19 22);
+  --danger-soft: oklch(95% 0.05 22);
+  --info: oklch(56% 0.13 250);
+  --info-soft: oklch(94% 0.03 250);
+
+  --shadow-sm: 0 1px 2px rgba(10, 20, 35, 0.05), 0 1px 1px rgba(10, 20, 35, 0.04);
+  --shadow-md: 0 4px 14px rgba(10, 20, 35, 0.08), 0 1px 3px rgba(10, 20, 35, 0.06);
+
+  --radius-sm: 8px;
+  --radius-md: 13px;
+  --radius-lg: 16px;
+  --radius-pill: 100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}

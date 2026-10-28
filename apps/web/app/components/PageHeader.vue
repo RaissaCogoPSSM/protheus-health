@@ -1,0 +1,41 @@
+<script setup lang="ts">
+defineProps<{
+  title: string
+  subtitle?: string
+}>()
+</script>
+
+<template>
+  <header class="page-header">
+    <div>
+      <h1>{{ title }}</h1>
+      <p v-if="subtitle">{{ subtitle }}</p>
+    </div>
+    <div class="actions">
+      <slot name="actions" />
+    </div>
+  </header>
+</template>
+
+<style scoped>
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+</style>
